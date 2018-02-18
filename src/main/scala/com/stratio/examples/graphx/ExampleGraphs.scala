@@ -80,12 +80,8 @@ object ExampleGraphs {
   }
 
   /**
-    * Recibimos 2 arrays: uno de vertices y otro de aristas:
-    *   vertexArray: Array[(VertexId,VertexProperty)], edgeArray: Array[Edge[EdgeProperty]]
-    * los cuales aun los tenemos en memoria local. Tenemos que generar sus RDD paralelizados para mandarlos al cluster
-    * Despues de generarlos los mostraremos utilizando un foreach y transformando cada dato en su correspondiente println
-    * Por ultimo crearemos el grafo paratiendo de ambos RDD's.
-    * IMPORTANTE: Como lo vamos a utilizar bastante, deberiamos cachear el grafo.
+    * Recibiendo dos arrays: vertexArray: Array[(VertexId,VertexProperty)], edgeArray: Array[Edge[EdgeProperty]]
+    * se construye un Graph[VertexProperty,EdgeProperty], partiendo de los RDD de vertices y edges convertidos
     *
     * @param vertexArray Array de vertices, cada vertice de tipo 'VertexProperty'
     * @param edgeArray Array de aristas, cada arista de tipo 'EdgeProperty'
@@ -108,10 +104,8 @@ object ExampleGraphs {
   }
 
   /**
-    * Recibimos el grafo creado y vamos a quedarnos con los vertices que sean estrictamente mayores de 'age' (argumento de la funcion)
-    * Para ello utilizaremos la funcion filter de RDD pasandole la condicion a filtrar (atributo age de VertexProperty > param age)
-    *
-    * Posteriormente mostraremos los resultados del filtrado
+    * Recibimos el grafo creado y vamos a quedarnos con los vertices que sean
+    * estrictamente mayores de 'age' (argumento de la funcion)
     *
     * @param g grafo de tipo Graph[VertexProperty, EdgeProperty]
     * @param age Edad para condicion de filtrado de los vertices
@@ -123,10 +117,8 @@ object ExampleGraphs {
   }
 
   /**
-    * Recibimos el grafo creado y vamos a quedarnos con los vertices que cumplan una condicion de filtrado (argumento de la funcion)
-    * Para ello utilizaremos la funcion filter de RDD indicandole como debe filtrar (utilizando la funcion de filtrado)
-    *
-    * Posteriormente mostraremos los resultados del filtrado
+    * Recibimos el grafo creado y vamos a quedarnos con los vertices que
+    * cumplan una condicion de filtrado (argumento de la funcion)
     *
     * @param g grafo de tipo Graph[VertexProperty, EdgeProperty]
     * @param fFilter funcion de filtrado de los vertices
@@ -160,17 +152,7 @@ object ExampleGraphs {
   case class User(name: String, age: Int, inDeg: Int, outDeg: Int)
 
   /**
-    * Queremos transformar un Graph[VertexProperty, EdgeProperty] a un Graph[User, EdgeProperty]
-    *
-    * Una de las soluciones mas sencillas es utilizando la funcion mapVertices para pasar de un
-    * Graph[VertexProperty, EdgeProperty] a un Graph[User, EdgeProperty].
-    *
-    * Tras esa operacion se puede utilizar la funcion outerJoinVertices para realizar un join entre vertices.
-    * Sabiendo que los metodos inDegrees y outDegrees de Graph te devuelven una "lista" de Vertices: VertexRDD[Int]
-    * con su correspondiente grado, podemos utilizar algo asi:
-    *     grafoMapeado.outerJoinVertices(grafoMapeado.inDegrees){...}
-    *
-    * IMPORTANTE: Como lo vamos a utilizar bastante, deberiamos cachear el grafo.
+    * Se transforma un Graph[VertexProperty, EdgeProperty] a un Graph[User, EdgeProperty] utilizando la funcion mapVertices
     *
     * @param g Grafo cuyos Vertices son de tipo VertexProperty y sus Aristas de tipo EdgeProperty
     * @return El mismo grafo, pero ahora sus vertices seran de tipo UserProperty.
@@ -192,11 +174,11 @@ object ExampleGraphs {
   }
 
   /**
-    * Vamos a utilizar el metodo pageRank de la clase Graph. Tiene varias signatures, nosotros solo le pasaremos
-    * la tolerancia hasta la convergencia tol = 0.01 y que coja el valor alpha por defecto resetProb = 0.15
-    * Nos quedaremos solo con el pageRank de los vertices, aunque tambien se computa el de las aristas
+    * Ejecuta el algoritmo pageRank de los vertices de un grafo de tipo Graph[User, EdgeProperty],
+    * y muestra el resultado.
+    * Para el algoritmo se utilizara el parametro de tolerancia a 0.01 y el valor de resetProb por defecto (0.15)
     *
-    * @param g grafo sobre el que queremos mostrar su pageRank de aristas
+    * @param g grafo sobre el que queremos mostrar su pageRank de vertices
     */
   def pageRankUserGraph(g: Graph[User, EdgeProperty]): Unit = {
     val rank: VertexRDD[Double] = g.pageRank(0.01).vertices

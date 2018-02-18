@@ -83,23 +83,16 @@ object ExampleGraphFrames {
     // Tambien valdria --> showFilteredVertex(g, (x:Int) => x > 40)
 
     /**
-      * En la ultima version de Graphframes han sacado como atributo triplets. Tan facil como acceder a g.triplets.
-      * Nosotros aqui utilizaremos dos opciones mas avanzadas:
+      * Para mostrar los triplets:
       * OPCIONES:
       *   1. showJoinTriplets --> Utilizar joins entre vertices y aristas (no utilizas la potencia de GraphFrames)
       *   2. showTripletsDSL --> Utilizando Motif Finding, una DSL de grafos (muy potente)
+      *   3. Ejecutar g.triplets, pero en realidad ejecuta g.find((src)-(e)->(dst))
       */
     println("\n[Mostrar Triplets]")
     //showJoinTriplets(g)
     showTripletsDSL(g)
 
-    /**
-      * Al no tener VertexProperty, sea cual sea, no tiene sentido transformarlo a case classes.
-      * Hay que ver un GraphFrame como 2 Dataset[Row], con sus schemas. --> "2 TABLAS"
-      * Observacion: No son Dataset[T] sino Dataset[Row], i.e DataFrames
-      */
-    //println("\n[Transformar grafo]")
-    //val userGraph = getUserGraph(g)
 
     /**
       * Uno de los algoritmos mas utiles y usados es el pageRank --> Importancia de la pagina/vertice dentro de la red.
@@ -110,20 +103,8 @@ object ExampleGraphFrames {
   }
 
   /**
-    * Recibimos 2 arrays: uno de vertices y otro de aristas:
-    *   vertexArray: Array[(String,String,Int)], edgeArray: Array[(String,String,Int)]
-    * los cuales aun los tenemos en memoria local. Tenemos que generar sus Dataframes paralelizados para mandarlos al cluster.
-    * OBS: Tener en cuenta que los Dataframes deben tener algunas columnas de nombre fijo: "id", "src" y "dst".
-    * Por convencion utilizaremos los nombres de columnas no fijos de la siguiente forma:
-    *   "name" --> Nombre del user
-    *   "age" --> Edad del user
-    *   "relationship" --> numero de likes
-    *
-    * Despues de generarlos los mostraremos utilizando el metodo show de Dataframe.
-    *
-    * Por ultimo crearemos el grafo partiendo de ambos Dataframes.
-    *
-    * IMPORTANTE: Como lo vamos a utilizar bastante, deberiamos cachear el grafoframe.
+    * Recibiendo dos arrays: Array[(String,String,Int)], edgeArray: Array[(String,String,Int)]
+    * se construye un GraphFrame, partiendo de los Dataframe de vertices y edges convertidos
     *
     * @param vertexArray Array de vertices, cada vertice se define por una tupla (String,String,Int)
     * @param edgeArray Array de aristas, cada arista se define por una tupla (String,String,Int)
@@ -144,10 +125,8 @@ object ExampleGraphFrames {
   }
 
   /**
-    * Recibimos el grafo creado y vamos a quedarnos con los vertices que sean estrictamente mayores de 'age' (argumento de la funcion)
-    * Para ello utilizaremos la funcion filter de dataframe pasandole la condicion a filtrar (columna age > param age)
-    *
-    * Posteriormente mostraremos los resultados del filtrado
+    * Recibimos el grafo creado y vamos a quedarnos con los vertices
+    * que sean estrictamente mayores de 'age' (argumento de la funcion)
     *
     * @param g Grafo a filtrar
     * @param age Edad para condicion de filtrado de los vertices
@@ -159,10 +138,8 @@ object ExampleGraphFrames {
   }
 
   /**
-    * Recibimos el grafo creado y vamos a quedarnos con los vertices que cumplan una condicion de filtrado (argumento de la funcion)
-    * Para ello utilizaremos la funcion filter de dataframe indicandole como debe filtrar (utilizando la funcion de filtrado)
-    *
-    * Posteriormente mostraremos los resultados del filtrado
+    * Recibimos el grafo creado y vamos a quedarnos con los vertices
+    * que cumplan una condicion de filtrado (argumento de la funcion)
     *
     * @param g Grafo a filtrar
     * @param fFilter funcion de filtrado de los vertices
@@ -175,12 +152,6 @@ object ExampleGraphFrames {
 
   /**
     * Recibimos el grafo creado y queremos mostrar los triplets del grafo (via join)
-    * Para ello tenemos que hacer 2 joins:
-    *   result = egdes JOIN vertices (para sacar el src junto con el edge)
-    *   result JOIN vertices (para añadir el dst)
-    * OBS: Las columnas name y age se duplicaran, por lo tanto es necesario renombrarlas con .as("")
-    *
-    * Posteriormente mostraremos los resultados de los triplets
     *
     * @param g Grafo sobre el cual se muestran sus triplets (via join)
     */
@@ -211,13 +182,6 @@ object ExampleGraphFrames {
 
   /**
     * Recibimos el grafo creado y queremos mostrar los triplets del grafo (via DSL)
-    * Para ello tenemos que utilizar el metodo find de GraphFrame pasandole como argumento una consulta "grafal"
-    * Y posteriormente seleccionaremos solo los siguientes campos:
-    *   1. Nombre del origen --> Lo llamaremos src_name
-    *   2. Nombre del destino --> Lo llamaremos dst_name
-    *   3. Relacion entre ellos (numero de likes) --> Lo llamaremos likes
-    *
-    * Posteriormente mostraremos los resultados de los triplets
     *
     * @param g Grafo sobre el cual se muestran sus triplets (via join)
     */
@@ -237,8 +201,8 @@ object ExampleGraphFrames {
   /**
     * Vamos a utilizar el metodo pageRank de la clase GraphFrame: g.pageRank.run()
     * En nuestro caso indicaremos dos parametros
-    *   1. Maximo de iteraciones del algoritmo --> g.pageRank.maxIter(3)
-    *   2. Probabilidad de reset o valor alpha, resetProb = 0.15 --> g.pageRank.maxIter(3).resetProbability(0.15)
+    *   1. Maximo de iteraciones del algoritmo
+    *   2. Probabilidad de reset o valor alpha, resetProb = 0.15
     *
     * Observacion: tras aplicar las variables hay que llamar explicitamente al metodo run()
     * Observacion 2: Nos quedaremos solo con el pageRank de los vertices, aunque tambien se computa el de las aristas
